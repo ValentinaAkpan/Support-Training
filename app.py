@@ -4,30 +4,29 @@ import requests
 from io import BytesIO
 
 # List of raw GitHub URLs for your Excel files
-EXCEL_FILE_URLS = {
-    "[ENGLISH] [INTERNAL] [2024] BeltMetrics Training Quiz (1-15)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/BeltMetrics_Training_Quiz.xlsx",
-    "[ENGLISH] [INTERNAL] [2024] General Product Training(1-78)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/General_Product_Training.xlsx",
-    "[ENGLISH] [INTERNAL] [2024] PortaMetrics Gen 2 Training Quiz(1-6)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/PortaMetrics_Training_Quiz.xlsx",
-    "LoaderMetrics™ Gen 2 Features Monitoring on MetricsManager Pro [EN](1-2)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/LoaderMetrics_Features_Monitoring.xlsx",
-    "[ENGLISH] [INTERNAL] [2024] TruckMetrics Training Quiz(1-39)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/TruckMetrics_Training_Quiz.xlsx",
-    "[ENGLISH] [INTERNAL] [2024] LoaderMetrics Training Quiz - TVM (1-37)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/LoaderMetrics_Training_Quiz.xlsx",
-    "[ENGLISH] [INTERNAL] [2024] ShovelMetrics Training Quiz - TVFWPM (1-52)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_Training_Quiz.xlsx",
-    "ShovelMetrics™ Gen 3 Training Overview - Onboarding - [EN](1-8)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_Training_Overview.xlsx",
-    "[EN] ShovelMetrics™ Gen 3 Features G.E.T Monitoring on MetricsManager Pro(1-8)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_GET_Monitoring.xlsx",
-    "ShovelMetrics™ Gen 3 Features Rock Monitoring on MetricsManager Pro [EN](1-9)": "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_Rock_Monitoring.xlsx",
-}
-
-
+EXCEL_FILE_URLS = [
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/BeltMetrics_Training_Quiz.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/General_Product_Training.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/PortaMetrics_Training_Quiz.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/LoaderMetrics_Features_Monitoring.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/TruckMetrics_Training_Quiz.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/LoaderMetrics_Training_Quiz.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_Training_Quiz.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_Training_Overview.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_GET_Monitoring.xlsx",
+    "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/ShovelMetrics_Rock_Monitoring.xlsx",
+]
 
 # Streamlit app title
 st.title("Excel File Overview")
 
+# Check if the URLs list is empty
 if not EXCEL_FILE_URLS:
     st.warning("No Excel file URLs provided.")
 else:
     data = []
 
-    for filename, url in EXCEL_FILE_URLS.items():
+    for url in EXCEL_FILE_URLS:
         try:
             # Fetch the file from the URL
             response = requests.get(url)
@@ -37,7 +36,8 @@ else:
             file_content = BytesIO(response.content)
             df = pd.ExcelFile(file_content)
 
-            product_name = file_mapping.get(filename, "Unknown Product")  # Extract product name using the mapping
+            # Extract the filename from URL
+            title = url.split("/")[-1]
 
             unique_names_per_title = set()  # To track unique names for this title
 
@@ -66,14 +66,13 @@ else:
                             data.append({
                                 "Date": row["Start time"],  # Use "Start time" as date
                                 "Name": taker_name,  # Extract the taker's name
-                                "Title": filename,  # Use the exact filename as title
-                                "Product": product_name,  # Include the product name
+                                "Title": title,  # Use the filename as title
                                 "Total Points": row["Total points"],  # Extract total points
                             })
                 else:
-                    st.warning(f"Sheet '{sheet_name}' in file '{filename}' is missing required columns.")
+                    st.warning(f"Sheet '{sheet_name}' in file '{title}' is missing required columns.")
         except Exception as e:
-            st.error(f"Error processing file '{filename}': {e}")
+            st.error(f"Error processing file from URL '{url}': {e}")
 
     # Display the collected data as a table
     if data:
