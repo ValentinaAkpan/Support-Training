@@ -3,8 +3,7 @@ import pandas as pd
 import requests
 from io import BytesIO
 
-
-# Exact file names
+# List of exact file names
 EXCEL_FILES = [
     "[ENGLISH] [INTERNAL] [2024] BeltMetrics Training Quiz (1-15).xlsx",
     "[ENGLISH] [INTERNAL] [2024] General Product Training(1-78).xlsx",
@@ -18,6 +17,9 @@ EXCEL_FILES = [
     "ShovelMetrics™ Gen 3 Features Rock Monitoring on MetricsManager Pro [EN](1-9).xlsx",
 ]
 
+# Base GitHub raw URL for your repository
+BASE_GITHUB_URL = "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/"
+
 # Streamlit app title
 st.title("Excel File Overview")
 
@@ -28,35 +30,35 @@ else:
 
     for filename in EXCEL_FILES:
         try:
-            # Build the raw file URL
+            # Construct the file URL
             file_url = f"{BASE_GITHUB_URL}{filename}"
 
             # Fetch the file from GitHub
             response = requests.get(file_url)
-            response.raise_for_status()  # Check for request errors
+            response.raise_for_status()  # Raise error for invalid requests
 
             # Load the Excel file
             file_content = BytesIO(response.content)
             df = pd.ExcelFile(file_content)
 
-            unique_names_per_title = set()  # To track unique names for this title
+            unique_names_per_title = set()  # Track unique names per title
 
             for sheet_name in df.sheet_names:
                 sheet_data = df.parse(sheet_name)
 
-                # Check for columns where names might exist
+                # Check for relevant columns
                 name_column = None
                 if "Name" in sheet_data.columns:
                     name_column = "Name"
                 elif "Please add your First name and Surname" in sheet_data.columns:
                     name_column = "Please add your First name and Surname"
 
-                # Process rows if a valid name column exists
+                # Process rows if required columns exist
                 if name_column and all(col in sheet_data.columns for col in ["Total points", "Start time"]):
                     for _, row in sheet_data.iterrows():
                         taker_name = row[name_column]
 
-                        # Fallback if name is empty or placeholder
+                        # Handle empty or placeholder names
                         if pd.isna(taker_name) or not taker_name.strip() or taker_name == "Please add your First name and Surname":
                             taker_name = "Name Not Provided"
 
