@@ -3,8 +3,6 @@ import pandas as pd
 import requests
 from io import BytesIO
 
-# Base raw GitHub directory URL
-BASE_GITHUB_URL = "https://raw.githubusercontent.com/ValentinaAkpan/Support-Training/main/"
 
 # Exact file names
 EXCEL_FILES = [
